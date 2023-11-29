@@ -3,6 +3,7 @@ package com.webflux.reactivesecurity.security;
 import com.webflux.reactivesecurity.Exceptions.AuthException;
 import com.webflux.reactivesecurity.entity.UserEntity;
 import com.webflux.reactivesecurity.repository.UserRepository;
+import com.webflux.reactivesecurity.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class SecurityService {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     @Value("${jwt.secret}")
     private String secret;
@@ -57,7 +58,7 @@ public class SecurityService {
                 .build();
     }
     public Mono<TokenDetails> authenticate(String username, String password){
-        return userRepository.findByUsername(username)
+        return userService.getUserByUsername(username)
                 .flatMap(user -> {
                     if(user.isEnabled()){
                         return Mono.error(new AuthException("Account disabled", "PROSELYTE_USER_ACCOUNT_DISABLED"));
