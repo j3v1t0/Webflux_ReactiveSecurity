@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -31,16 +32,21 @@ public class WebSecurityConfig {
         return http
                 .csrf().disable()
                 .authorizeExchange()
+                .pathMatchers(HttpMethod.OPTIONS)
+                .permitAll()
+                .pathMatchers(publicRoutes)
+                .permitAll()
                 .anyExchange()
                 .authenticated()
                 .and()
                 .exceptionHandling()
-                .authenticationEntryPoint((swe, e) -> {
+                .authenticationEntryPoint((swe , e) -> {
                     log.error("IN securityWebFilterChain - unauthorized error: {}", e.getMessage());
                     return Mono.fromRunnable(() -> swe.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED));
                 })
                 .accessDeniedHandler((swe, e) -> {
                     log.error("IN securityWebFilterChain - access denied: {}", e.getMessage());
+
                     return Mono.fromRunnable(() -> swe.getResponse().setStatusCode(HttpStatus.FORBIDDEN));
                 })
                 .and()

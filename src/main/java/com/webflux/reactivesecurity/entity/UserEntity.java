@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("users")
+@Table(value = "users", schema = "anime")
 public class UserEntity {
     @Id
     private Long id;
@@ -19,10 +19,11 @@ public class UserEntity {
     private String firstName;
     private String lastName;
     private boolean enabled;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
     @ToString.Include(name = "password")
-    private String maskPassword(){
+    private String maskPassword() {
         return "********";
     }
 }

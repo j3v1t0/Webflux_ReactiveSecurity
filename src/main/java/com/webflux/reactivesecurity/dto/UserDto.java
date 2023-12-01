@@ -19,6 +19,6 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private boolean enabled;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

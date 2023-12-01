@@ -2,7 +2,7 @@ package com.webflux.reactivesecurity.security;
 
 import com.webflux.reactivesecurity.Exceptions.AuthException;
 import com.webflux.reactivesecurity.entity.UserEntity;
-import com.webflux.reactivesecurity.repository.UserRepository;
+
 import com.webflux.reactivesecurity.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -17,8 +17,10 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class SecurityService {
+
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expiration}")
@@ -26,20 +28,23 @@ public class SecurityService {
     @Value("${jwt.issuer}")
     private String issuer;
 
-    private TokenDetails generateToken(UserEntity user){
-        Map<String, Object> claims = new HashMap<>(){{
+
+    private TokenDetails generateToken(UserEntity user) {
+        Map<String, Object> claims = new HashMap<>() {{
             put("role", user.getRole());
-            put("username",user.getUsername());
+            put("username", user.getUsername());
         }};
-        return generateToken(claims,user.getId().toString());
+        return generateToken(claims, user.getId().toString());
     }
-    private TokenDetails generateToken(Map<String,Object> claims, String subject){
+
+    private TokenDetails generateToken(Map<String, Object> claims, String subject) {
         Long expirationTimeInMillis = expirationInSeconds * 1000L;
         Date expirationDate = new Date(new Date().getTime() + expirationTimeInMillis);
 
-        return generateToken(expirationDate,claims,subject);
+        return generateToken(expirationDate, claims, subject);
     }
-    private TokenDetails generateToken(Date expirationDate, Map<String, Object> claims, String subject){
+
+    private TokenDetails generateToken(Date expirationDate, Map<String, Object> claims, String subject) {
         Date createdDate = new Date();
         String token = Jwts.builder()
                 .setClaims(claims)
@@ -57,15 +62,18 @@ public class SecurityService {
                 .expiresAt(expirationDate)
                 .build();
     }
-    public Mono<TokenDetails> authenticate(String username, String password){
+
+    public Mono<TokenDetails> authenticate(String username, String password) {
         return userService.getUserByUsername(username)
                 .flatMap(user -> {
-                    if(user.isEnabled()){
+                    if (!user.isEnabled()) {
                         return Mono.error(new AuthException("Account disabled", "PROSELYTE_USER_ACCOUNT_DISABLED"));
                     }
-                    if (!passwordEncoder.matches(password, user.getPassword())){
+
+                    if (!passwordEncoder.matches(password, user.getPassword())) {
                         return Mono.error(new AuthException("Invalid password", "PROSELYTE_INVALID_PASSWORD"));
                     }
+
                     return Mono.just(generateToken(user).toBuilder()
                             .userId(user.getId())
                             .build());

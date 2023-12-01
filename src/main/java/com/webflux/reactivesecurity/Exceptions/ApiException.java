@@ -1,10 +1,14 @@
 package com.webflux.reactivesecurity.Exceptions;
 
+import lombok.Getter;
+
 public class ApiException extends RuntimeException{
 
-    protected String erroCode;
-    public ApiException(String message, String erroCode){
+    @Getter
+    protected String errorCode;
+
+    public ApiException(String message, String errorCode) {
         super(message);
-        this.erroCode = erroCode;
+        this.errorCode = errorCode;
     }
 }

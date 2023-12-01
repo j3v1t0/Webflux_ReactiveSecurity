@@ -11,21 +11,20 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    @Override
-    public Mono<UserEntity> registerUser(UserEntity userEntity){
+
+    public Mono<UserEntity> registerUser(UserEntity user) {
         return userRepository.save(
-                userEntity.toBuilder()
-                        .password(passwordEncoder.encode(userEntity.getPassword()))
+                user.toBuilder()
+                        .password(passwordEncoder.encode(user.getPassword()))
                         .role(UserRole.USER)
                         .enabled(true)
-                        .createAt(LocalDateTime.now())
+                        .createdAt(LocalDateTime.now())
                         .updatedAt(LocalDateTime.now())
                         .build()
         ).doOnSuccess(u -> {
@@ -33,12 +32,11 @@ public class UserServiceImpl implements UserService {
         });
     }
 
-    @Override
-    public Mono<UserEntity> getUserById(Long id){
+    public Mono<UserEntity> getUserById(Long id) {
         return userRepository.findById(id);
     }
-    @Override
-    public Mono<UserEntity> getUserByUsername(String username){
+
+    public Mono<UserEntity> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 }

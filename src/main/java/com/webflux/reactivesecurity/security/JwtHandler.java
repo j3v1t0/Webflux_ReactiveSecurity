@@ -1,6 +1,6 @@
 package com.webflux.reactivesecurity.security;
 
-import com.webflux.reactivesecurity.Exceptions.AuthException;
+
 import com.webflux.reactivesecurity.Exceptions.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -17,32 +17,35 @@ public class JwtHandler {
         this.secret = secret;
     }
 
-    public Mono<VerificationResult> check(String accessToken){
+    public Mono<VerificationResult> check(String accessToken) {
         return Mono.just(verify(accessToken))
                 .onErrorResume(e -> Mono.error(new UnauthorizedException(e.getMessage())));
     }
 
-    private VerificationResult verify(String token){
+    private VerificationResult verify(String token) {
         Claims claims = getClaimsFromToken(token);
         final Date expirationDate = claims.getExpiration();
 
-        if(expirationDate.before(new Date())){
+
+        if (expirationDate.before(new Date())) {
             throw new RuntimeException("Token expired");
         }
+
         return new VerificationResult(claims, token);
     }
-    private Claims getClaimsFromToken(String token){
+
+    private Claims getClaimsFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(Base64.getEncoder().encodeToString(secret.getBytes()))
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
     }
 
-    public static class VerificationResult{
+    public static class VerificationResult {
         public Claims claims;
         public String token;
 
-        public VerificationResult(Claims claims, String token){
+        public VerificationResult(Claims claims, String token) {
             this.claims = claims;
             this.token = token;
         }

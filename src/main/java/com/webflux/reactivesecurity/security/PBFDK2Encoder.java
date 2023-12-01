@@ -12,25 +12,30 @@ import java.util.Base64;
 
 @Component
 public class PBFDK2Encoder implements PasswordEncoder {
+
     @Value("${jwt.password.encoder.secret}")
     private String secret;
     @Value("${jwt.password.encoder.iteration}")
     private Integer iteration;
     @Value("${jwt.password.encoder.keylength}")
     private Integer keyLength;
+
     private static final String SECRET_KEY_INSTANCE = "PBKDF2WithHmacSHA512";
+
     @Override
     public String encode(CharSequence rawPassword) {
-        try{
+
+        try {
             byte [] result = SecretKeyFactory.getInstance(SECRET_KEY_INSTANCE)
                     .generateSecret(new PBEKeySpec(rawPassword.toString().toCharArray(),
                             secret.getBytes(), iteration, keyLength))
                     .getEncoded();
             return Base64.getEncoder()
                     .encodeToString(result);
-        }catch (NoSuchAlgorithmException | InvalidKeySpecException e){
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     @Override
